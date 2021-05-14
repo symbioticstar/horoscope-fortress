@@ -32,6 +32,7 @@ enum class HscError {
   EReadPipe,
   EUnshare,
   EMmap,
+  EExec,
   EDup2Stdin = 64,
   EDup2Stdout,
   EDup2Stderr,

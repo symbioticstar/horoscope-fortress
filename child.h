@@ -24,6 +24,7 @@ int child(void *params) {
 
     close(ctx.pipe_fd[0]);
     auto write_fd = ctx.pipe_fd[1];
+    defer _(nullptr, [=](...) { close(write_fd); });
 
     try {
         /* redirect stdin */
@@ -104,11 +105,13 @@ int child(void *params) {
         return -1;
     } catch (...) {
         write_to_fd(write_fd, static_cast<int>(HscError::EUnknown));
-        return -1;
+        return -2;
     }
 
-    close(write_fd);
-    execvp(args.pathname, args.args);
+    if (execvp(args.pathname, args.args)) {
+        write_to_fd(write_fd, static_cast<int>(HscError::EExec));
+        return -3;
+    }
 
     return 0;
 }

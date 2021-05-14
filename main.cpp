@@ -20,7 +20,6 @@ void exec(const args_t &args) {
     defer _(nullptr, [=](...) { cg->destroy(); });
 
     int pipe_fd[2];
-    auto read_fd = pipe_fd[0];
     if (pipe2(pipe_fd, O_CLOEXEC)) {
         throw hsc_error(HscError::EPipe);
     }
@@ -28,6 +27,7 @@ void exec(const args_t &args) {
     auto child_pid = clone(child, stack_top, clone_flag, &ctx);
     if (child_pid == -1) throw hsc_error(HscError::EChild);
 
+    auto read_fd = pipe_fd[0];
     close(pipe_fd[1]);
     defer _c(nullptr, [=](...) { close(pipe_fd[0]); });
 
@@ -56,8 +56,10 @@ void exec(const args_t &args) {
         cg->get_value<uint64_t>("memory", "memory.max_usage_in_bytes")
     };
 
-    std::apply([&out = std::cout](auto &&... args) { ((..., (out << args << ' '))); }, std::move(t));
-    std::cout << std::endl;
+    auto &out = args.fd == 2 ? std::cerr : std::cout;
+
+    std::apply([&out](auto &&... args) { ((..., (out << args << ' '))); }, std::move(t));
+    out << std::endl;
 }
 
 int main(int argc, char **argv) {
