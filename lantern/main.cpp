@@ -16,6 +16,7 @@ void exec(const args_t &args) {
     cg->attach_controller("cpuacct");
     if (args.cgroup_pids) cg->set_value("pids", "pids.max", args.cgroup_pids);
     cg->set_value("memory", "memory.limit_in_bytes", args.cgroup_mem);
+    if (args.cpu_quota > 0) cg->set_value("cpu", "cpu.cfs_quota_us", args.cpu_quota);
 
     defer _(nullptr, [=](...) { cg->destroy(); });
 

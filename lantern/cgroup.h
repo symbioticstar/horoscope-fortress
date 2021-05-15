@@ -18,7 +18,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
-#include "hsc.h"
+#include "../hsc.h"
 
 using std::vector;
 using std::string;

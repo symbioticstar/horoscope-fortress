@@ -1,6 +1,6 @@
 #pragma once
 
-#include "hsc.h"
+#include "../hsc.h"
 
 #include <cstdint>
 #include <argp.h>
@@ -21,6 +21,7 @@ enum option_key {
   lifetime = 't',
   cgroup_mem = 'm',
   cgroup_pids = 'p',
+  cgroup_cpus = 'q',
   stdin_path = 1000,
   stdout_path = 1001,
   stderr_path = 1002,
@@ -33,18 +34,18 @@ static constexpr argp_option options[] = {
     {"lifetime", option_key::lifetime, "s", 0},
     {"cgroup-memory", option_key::cgroup_mem, "MiB"},
     {"cgroup-pids", option_key::cgroup_pids, "count"},
+    {"cgroup-cpus", option_key::cgroup_cpus, "cores"},
 
     {"stdin-path", option_key::stdin_path, "path"},
     {"stdout-path", option_key::stdout_path, "path"},
     {"stderr-path", option_key::stderr_path, "path"},
 
+    {"cwd", option_key::cwd, "path"},
+
     {"uid", option_key::uid, "uid"},
     {"gid", option_key::gid, "gid"},
     {"report-fd", option_key::report_fd, "fd"},
-    {
-        "disable-execve-once", option_key::disable_execve_once, nullptr, OPTION_ARG_OPTIONAL,
-        "Allow execve call with pathname provided only"
-    },
+    {"disable-execve-once", option_key::disable_execve_once},
     {nullptr}
 };
 
@@ -56,7 +57,6 @@ class args_t {
   uint64_t rlimit_fsize{128 << 20};
   uint64_t rlimit_stack{0};
   bool execve_once{true};
-  bool stderr_to_stdout{false};
 
   uid_t uid{0};
   gid_t gid{0};
@@ -65,6 +65,7 @@ class args_t {
   uint32_t lifetime{0};
   uint64_t cgroup_mem{1 << 30};
   uint64_t cgroup_pids{10};
+  int64_t cpu_quota{-1};
 
   char *stdin_path{nullptr};
   char *stdout_path{nullptr};
@@ -102,6 +103,8 @@ int args_t::parse_opt(int key, char *arg, struct argp_state *state) {
         case ::cgroup_mem:self->cgroup_mem = strtoull(arg, nullptr, 10) << 20;
             break;
         case ::cgroup_pids:self->cgroup_pids = strtoull(arg, nullptr, 10) << 20;
+            break;
+        case ::cgroup_cpus:self->cpu_quota = 1e5 * strtod(arg, nullptr);
             break;
         case ::stdin_path:self->stdin_path = arg;
             break;

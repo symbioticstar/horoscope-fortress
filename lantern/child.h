@@ -13,7 +13,6 @@ struct child_context {
   args_t args;
   std::shared_ptr<cgroup> cg;
   int *pipe_fd;
-
 };
 
 int child(void *params) {
