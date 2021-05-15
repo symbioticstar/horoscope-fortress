@@ -28,7 +28,6 @@ const vector<tuple<str, str, str>> latern_mapping = {
     {"rlimit_fsize", "rlimit-fsize", "128"},
     {"uid", "uid", nullptr},
     {"gid", "gid", nullptr},
-    {"execve_once", "execve-once", nullptr},
     {"report_fd", "report-fd", "1"}
 };
 
@@ -62,6 +61,8 @@ lantern_call make_lantern_call(const httplib::Request &req, char *lantern_binary
         if (!value_got.empty()) lc.append("--"s + to + "=" + value_got);
     }
 
+    if (req.get_param_value("execve_once") == "false") lc.append("-o");
+
     lc.append("--");
 
     auto args_str = req.get_param_value("args_str");
@@ -84,6 +85,7 @@ string collect_stdout(const char *bin, char *const *args) {
         throw hsc_error(HscError::EChild);
     } else if (pid != 0) {
         close(pipe_fd[1]);
+        defer _(nullptr, [=](...) { close(pipe_fd[0]); });
         char buf[4100];
         memset(buf, 0, sizeof(buf));
         string res;
