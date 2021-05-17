@@ -6,7 +6,7 @@
 #include <argp.h>
 #include <cassert>
 
-const char *argp_program_version = "1.0.0";
+const char *argp_program_version = "1.1.0";
 const char *argp_program_bug_address = "<i@sst.st>";
 static constexpr char doc[] = "Horoscope Fortress";
 static constexpr char args_doc[] = " -- [BIN] [ARGS]";

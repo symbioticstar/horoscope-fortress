@@ -65,9 +65,9 @@ int child(void *params) {
 
         if (args.execve_once) {
             scmp_filter_ctx ctx = seccomp_init(SCMP_ACT_ALLOW);
+            defer _(nullptr, [=](...) { seccomp_release(ctx); });
             if (seccomp_rule_add(ctx, SCMP_ACT_KILL, SCMP_SYS(execve), 1,
                                  SCMP_A0(SCMP_CMP_NE, (scmp_datum_t)(args.pathname))) != 0) {
-                seccomp_release(ctx);
                 throw hsc_error(HscError::ESeccomp);
             }
             if (seccomp_load(ctx)) {

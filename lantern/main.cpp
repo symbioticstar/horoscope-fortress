@@ -25,6 +25,7 @@ void exec(const args_t &args) {
         throw hsc_error(HscError::EPipe);
     }
     child_context ctx{args, cg, pipe_fd};
+    auto start = std::chrono::steady_clock::now();
     auto child_pid = clone(child, stack_top, clone_flag, &ctx);
     if (child_pid == -1) throw hsc_error(HscError::EChild);
 
@@ -49,11 +50,15 @@ void exec(const args_t &args) {
         throw hsc_error(HscError::EWait);
     }
 
+    auto end = std::chrono::steady_clock::now();
+    auto real_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+
     std::tuple t = {
         WEXITSTATUS(status),
         WTERMSIG(status),
         cg->get_value<uint64_t>("cpuacct", "cpuacct.usage_sys"),
         cg->get_value<uint64_t>("cpuacct", "cpuacct.usage_user"),
+        real_time,
         cg->get_value<uint64_t>("memory", "memory.max_usage_in_bytes")
     };
 

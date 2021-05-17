@@ -14,7 +14,7 @@ int main(int argc, char **argv) {
 
     httplib::Server server;
     server.Get("/", [](const httplib::Request &req, httplib::Response &res) {
-      res.set_content("fair-1.0", "text/plain");
+      res.set_content("fair-1.1", "text/plain");
     });
 
     server.Get("/run", [=](const httplib::Request &req, httplib::Response &res) {
