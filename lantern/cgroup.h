@@ -45,9 +45,6 @@ class cgroup {
       for (auto &c : controller_names) {
           std::error_code e;
           remove(base_dir / c / name, e); // ignore
-          if (e) {
-              cerr << string{"DesErr:"} + e.message() << endl;
-          }
       }
   }
 

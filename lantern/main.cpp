@@ -18,8 +18,6 @@ void exec(const args_t &args) {
     cg->set_value("memory", "memory.limit_in_bytes", args.cgroup_mem);
     if (args.cpu_quota > 0) cg->set_value("cpu", "cpu.cfs_quota_us", args.cpu_quota);
 
-    defer _(nullptr, [=](...) { cg->destroy(); });
-
     int pipe_fd[2];
     if (pipe2(pipe_fd, O_CLOEXEC)) {
         throw hsc_error(HscError::EPipe);
@@ -28,6 +26,8 @@ void exec(const args_t &args) {
     auto start = std::chrono::steady_clock::now();
     auto child_pid = clone(child, stack_top, clone_flag, &ctx);
     if (child_pid == -1) throw hsc_error(HscError::EChild);
+
+    defer _(nullptr, [=](...) { cg->destroy(); });
 
     auto read_fd = pipe_fd[0];
     close(pipe_fd[1]);
