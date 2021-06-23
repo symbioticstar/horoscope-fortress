@@ -9,6 +9,7 @@
 #include <string>
 #include <optional>
 #include <sys/wait.h>
+#include <sys/resource.h>
 
 using std::vector, std::string, std::tuple;
 using std::optional, std::nullopt;
@@ -103,6 +104,9 @@ string collect_stdout(const char *bin, char *const *args) {
     } else {
         dup2(pipe_fd[1], STDOUT_FILENO);
         dup2(pipe_fd[1], STDERR_FILENO);
+        rlim_t fsize = 128 << 20;
+        const rlimit rl = {.rlim_cur=fsize, .rlim_max=fsize};
+        setrlimit(RLIMIT_FSIZE, &rl);
         execvp(bin, args);
     }
 }

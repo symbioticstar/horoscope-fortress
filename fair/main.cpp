@@ -21,8 +21,8 @@ int main(int argc, char **argv) {
       try {
           auto call = make_lantern_call(req, lantern_binary);
           auto args = call.freeze();
-          for (const char **it = args; *it; it++) cerr << *it << " ";
-          cerr << endl;
+//          for (const char **it = args; *it; it++) cerr << *it << " ";
+//          cerr << endl;
           auto result = collect_stdout(lantern_binary, const_cast<char *const *>(args));
           res.set_content(result, "text/plain");
       } catch (hsc_error &e) {
